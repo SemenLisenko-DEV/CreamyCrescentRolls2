@@ -1,4 +1,5 @@
 using CreamyCrescentRolls.RoomGame.AdditionalSystems;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,6 +7,7 @@ public class CanvasController : MonoBehaviour
 {
     public const string noneActiveCanvas = "NONE";
 
+    [Serializable]
     public struct RederectPair
     {
         public string activeCanvas;
