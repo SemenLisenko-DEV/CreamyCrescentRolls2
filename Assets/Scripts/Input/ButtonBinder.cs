@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,6 +6,7 @@ using UnityEngine.Events;
 
 public class ButtonBinder : MonoBehaviour
 {
+    [Serializable]
     public class ButtonBind
     {
         public string buttonName;
@@ -15,6 +17,11 @@ public class ButtonBinder : MonoBehaviour
     [SerializeField] private List<ButtonBind> _buttonBinds = new();
 
     private List<Coroutine> _binds = new();
+
+    public void Awake()
+    {
+        InitializeBinds();
+    }
 
     public IEnumerator ButtonCoroutine(ButtonBind buttonBind)
     {
