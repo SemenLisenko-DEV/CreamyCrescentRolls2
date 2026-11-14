@@ -69,6 +69,12 @@ public class CanvasController : MonoBehaviour
 
     public void DisableAllCanvases()
     {
+        if (changeBlockConditions.GetState())
+        {
+            Debug.Log("[CanvasController] Canvas change is blocked");
+            return;
+        }
+
         foreach (var canvas in canvases)
         {
             canvas.SetActive(false);
