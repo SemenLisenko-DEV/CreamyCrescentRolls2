@@ -13,6 +13,8 @@ public class SceneChangeManager : MonoBehaviour
 
     private IEnumerator LoadScene_C(string sceneName)
     {
+        onStartLoad.Invoke();
+
         yield return new WaitForSecondsRealtime(_loadTime);
 
         SceneManager.LoadSceneAsync(sceneName);
