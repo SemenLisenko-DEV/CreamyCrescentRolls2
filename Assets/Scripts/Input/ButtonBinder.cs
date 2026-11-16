@@ -7,7 +7,7 @@ using UnityEngine.Events;
 public class ButtonBinder : MonoBehaviour
 {
     [Serializable]
-    public class ButtonBind
+    private class ButtonBind
     {
         public string buttonName;
 
@@ -18,12 +18,12 @@ public class ButtonBinder : MonoBehaviour
 
     private List<Coroutine> _binds = new();
 
-    public void Awake()
+    private void Awake()
     {
         InitializeBinds();
     }
 
-    public IEnumerator ButtonCoroutine(ButtonBind buttonBind)
+    private IEnumerator ButtonCoroutine(ButtonBind buttonBind)
     {
         while (true)
         {
@@ -35,7 +35,7 @@ public class ButtonBinder : MonoBehaviour
         }
     }
 
-    public void InitializeBinds()
+    private void InitializeBinds()
     {
         if (_binds.Count != 0)
             ClearBinds();
@@ -46,7 +46,7 @@ public class ButtonBinder : MonoBehaviour
         }
     }
 
-    public void ClearBinds()
+    private void ClearBinds()
     {
         foreach (var bind in _binds)
         {

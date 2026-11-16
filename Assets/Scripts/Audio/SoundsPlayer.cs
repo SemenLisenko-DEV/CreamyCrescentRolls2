@@ -41,7 +41,7 @@ public class SoundsPlayer : MonoBehaviour
 
     public void PlaySound(string name) => _audioSource.PlayOneShot(GetClip(name));
 
-    public AudioClip GetClip(string name)
+    private AudioClip GetClip(string name)
     {
         foreach (AudioClip clip in _clips)
         {
