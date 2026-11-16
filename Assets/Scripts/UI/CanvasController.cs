@@ -1,4 +1,6 @@
 using CreamyCrescentRolls.RoomGame.Conditions;
+using CreamyCrescentRolls.RoomGame.GameCursor;
+using CreamyCrescentRolls.RoomGame.GameTime;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -16,7 +18,7 @@ public class CanvasController : MonoBehaviour
 
     public List<RederectPair> rederectPairs = new();
 
-    public ConditionsHolder changeBlockConditions = new();
+    public ConditionsHolder changeBlockConditions = new(ConditonCheckType.Any);
 
     public List<GameObject> canvases;
 
@@ -28,7 +30,7 @@ public class CanvasController : MonoBehaviour
         {
             foreach (var c in canvases)
             {
-                if (c.gameObject.activeSelf)
+                if (c.activeSelf)
                     return c.name;
             }
 
@@ -43,7 +45,13 @@ public class CanvasController : MonoBehaviour
             Debug.Log("[CanvasController] Canvas change is blocked");
             return;
         }
-            
+
+        if (ActiveCanvas == name)
+        {
+            DisableAllCanvases();
+            return;
+        }
+
         DisableAllCanvases();
 
         string rederectPair = GetRederectPair(ActiveCanvas);
@@ -53,20 +61,24 @@ public class CanvasController : MonoBehaviour
             return;  
         }
 
-        if (ActiveCanvas == name)
-            return;
-
         foreach (var c in canvases)
         {
             if(c.name == name)
             {
-                c.SetActive(true);
+                SetCanvas(c);
                 return;
             }    
         }
 
         Debug.LogError($"[CanvasController] Canvas with name: {name} not found");
         throw new System.Exception();
+    }
+
+    private void SetCanvas(GameObject canvas)
+    {
+        CursorManager.AddVisibleHandler(gameObject);
+        TimeManager.AddTimeStopper(gameObject);
+        canvas.SetActive(true);
     }
 
     public void DisableAllCanvases()
@@ -81,6 +93,9 @@ public class CanvasController : MonoBehaviour
         {
             canvas.SetActive(false);
         }
+
+        CursorManager.RemoveVisibleHandler(gameObject);
+        TimeManager.RemoveTimeStopper(gameObject);
     }
 
     public string GetRederectPair(string activeCanvas)
