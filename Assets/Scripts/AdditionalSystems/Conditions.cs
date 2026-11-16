@@ -14,18 +14,30 @@ namespace CreamyCrescentRolls.RoomGame.Conditions
 
     public class ConditionsHolder
     {
+        public ConditionsHolder()
+        {
+        }
+
+        public ConditionsHolder(ConditonCheckType checkType)
+        {
+            this.checkType = checkType;
+        }
+
         public ConditonCheckType checkType;
 
-        private Dictionary<string, Conditon> conditons;
+        private Dictionary<string, Conditon> _conditons = new();
 
-        public bool GetState()
+        public bool GetState(bool logs = false)
         {
             int count = 0;
 
-            foreach (var conditon in conditons.Values)
+            foreach (var conditon in _conditons.Values)
             {
                 count += conditon.Invoke() ? 1 : 0;
             }
+
+            if (logs)
+                Debug.Log($"[ConditionsHolder] Count of true conditions: {count}");
 
             switch(checkType)
             {
@@ -33,7 +45,7 @@ namespace CreamyCrescentRolls.RoomGame.Conditions
                     return count == 0;
 
                 case ConditonCheckType.All:
-                    return count == conditons.Count;
+                    return count == _conditons.Count;
 
                 case ConditonCheckType.Any:
                     return count != 0;
@@ -46,24 +58,24 @@ namespace CreamyCrescentRolls.RoomGame.Conditions
 
         public void AddListener(Conditon conditon, string id)
         {
-            if(conditons.ContainsKey(id))
+            if(_conditons.ContainsKey(id))
             {
                 Debug.LogWarning("[ConditionsHolder] ConditionsHolder already contains condition with id: " + id);
                 return;
-            }    
+            }
 
-            conditons.Add(id, conditon);
+            _conditons.Add(id, conditon);
         }
 
         public void DeleteListener(string id)
         {
-            if (!conditons.ContainsKey(id))
+            if (!_conditons.ContainsKey(id))
             {
                 Debug.LogWarning("[ConditionsHolder] ConditionsHolder dosent contains condition with id: " + id);
                 return;
             }
 
-            conditons.Remove(id);
+            _conditons.Remove(id);
         }
     }
 }
