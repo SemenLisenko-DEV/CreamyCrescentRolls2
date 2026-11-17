@@ -76,7 +76,6 @@ public class CanvasController : MonoBehaviour
 
     private void SetCanvas(GameObject canvas)
     {
-        CursorManager.AddVisibleHandler(gameObject);
         TimeManager.AddTimeStopper(gameObject);
         canvas.SetActive(true);
     }
@@ -94,7 +93,6 @@ public class CanvasController : MonoBehaviour
             canvas.SetActive(false);
         }
 
-        CursorManager.RemoveVisibleHandler(gameObject);
         TimeManager.RemoveTimeStopper(gameObject);
     }
 
