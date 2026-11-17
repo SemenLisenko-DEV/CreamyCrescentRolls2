@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using CreamyCrescentRolls.RoomGame.Conditions;
 using CreamyCrescentRolls.RoomGame.Settings;
 using UnityEngine;
+using UnityEngine.Events;
 
 [DefaultExecutionOrder(-1000)]
 public class GameSettings : MonoBehaviour
@@ -13,6 +15,7 @@ public class GameSettings : MonoBehaviour
     [SerializeField] private List<StringSetting> _stringSettings = new();
     [SerializeField] private string _fileName = "settings.json";
     [SerializeField] private bool _persistBetweenScenes = true;
+    [SerializeField] private UnityEvent _onUnsavedChangesChecked = new();
 
     public static GameSettings Instance { get; private set; }
     public static event Action SettingsApplied;
@@ -20,6 +23,9 @@ public class GameSettings : MonoBehaviour
     private SettingsState _state;
     private string _savePath;
     private bool _busy;
+    private bool _checkingUnsavedChanges;
+    private string _canvasBlockConditionId;
+    private readonly HashSet<ConditionsHolder> _canvasBlockConditions = new();
 
     private void Awake()
     {
@@ -69,8 +75,56 @@ public class GameSettings : MonoBehaviour
 
     private void OnDestroy()
     {
+        foreach (var conditions in _canvasBlockConditions)
+            conditions.DeleteListener(_canvasBlockConditionId);
+
+        _canvasBlockConditions.Clear();
+
         if (Instance == this)
             Instance = null;
+    }
+
+    public bool HasUnsavedChanges() => _state != null && _state.HasPendingChanges();
+
+    public void CheckUnsavedChanges(CanvasController canvasController)
+    {
+        if (_checkingUnsavedChanges)
+            return;
+
+        _checkingUnsavedChanges = true;
+        try
+        {
+            if (Instance != this || _state == null)
+            {
+                Debug.LogWarning("[GameSettings] Cannot check changes before initialization.", this);
+                return;
+            }
+
+            if (canvasController == null || canvasController.changeBlockConditions == null)
+            {
+                Debug.LogWarning("[GameSettings] CanvasController and its block conditions must be assigned.", this);
+                return;
+            }
+
+            var conditions = canvasController.changeBlockConditions;
+            if (conditions.checkType != ConditonCheckType.Any)
+            {
+                Debug.LogWarning("[GameSettings] Canvas block conditions must use Any.", this);
+                return;
+            }
+
+            if (_canvasBlockConditions.Add(conditions))
+            {
+                _canvasBlockConditionId ??= $"GameSettings.UnsavedChanges.{GetInstanceID()}";
+                conditions.AddListener(HasUnsavedChanges, _canvasBlockConditionId);
+            }
+        }
+        finally
+        {
+            try { _onUnsavedChangesChecked?.Invoke(); }
+            catch (Exception exception) { Debug.LogException(exception, this); }
+            finally { _checkingUnsavedChanges = false; }
+        }
     }
 
     public static T GetSetting<T>(string name)

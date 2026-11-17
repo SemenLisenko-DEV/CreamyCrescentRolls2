@@ -1933,6 +1933,9 @@ MonoBehaviour:
   _stringSettings: []
   _fileName: settings.json
   _persistBetweenScenes: 0
+  _onUnsavedChangesChecked:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1006587336
 GameObject:
   m_ObjectHideFlags: 0

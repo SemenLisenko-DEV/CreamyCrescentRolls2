@@ -182,6 +182,17 @@ namespace CreamyCrescentRolls.RoomGame.Settings
             }
         }
 
+        public bool HasPendingChanges()
+        {
+            foreach (var pair in _pending)
+            {
+                if (!Equals(_applied[pair.Key], pair.Value))
+                    return true;
+            }
+
+            return false;
+        }
+
         public bool CommitPending()
         {
             bool changed = false;
