@@ -1,12 +1,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class CameraController : MonoBehaviour
 {
+    public static CameraController Instance;
+
     [SerializeField] private float _sensative = 200;
     [SerializeField, Min(0f)] private float _transitionTime = 1f;
 
@@ -46,8 +47,25 @@ public class CameraController : MonoBehaviour
 
     private bool _transition = false;
 
+    [SerializeField] private LayerMask rayCastLayer;
+    public Vector3 RayCastPoint
+    {
+        get
+        {
+            if(Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, 20f, rayCastLayer))
+            {
+                return hit.point;
+            }
+
+            Debug.LogError("[CameraController] Raycast nothing hited");
+            return Vector3.zero;
+        }
+    }
+
     private void Awake()
     {
+        Instance = this;
+
         Vector3 initialRotation = transform.eulerAngles;
         _rotationX = Mathf.DeltaAngle(0f, initialRotation.x);
         _rotationY = Mathf.DeltaAngle(0f, initialRotation.y);
@@ -149,13 +167,7 @@ public class CameraController : MonoBehaviour
 
         if (preserveLookPoint)
         {
-            Vector3 initialDirection = startRotation * Vector3.forward;
-            previousLookPoint = startPosition + initialDirection * 1000f;
-            if (Physics.Raycast(startPosition, initialDirection, out RaycastHit hit,
-                Mathf.Infinity, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
-            {
-                previousLookPoint = hit.point;
-            }
+            previousLookPoint = RayCastPoint;
 
             targetRotation = startRotation;
             Vector3 lookDirection = previousLookPoint - targetPosition;
