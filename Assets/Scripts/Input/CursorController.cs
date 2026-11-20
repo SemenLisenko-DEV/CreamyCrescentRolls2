@@ -20,6 +20,20 @@ public class CursorController : MonoBehaviour
     }
     private void OnGlobalEvent(GameObject target, Type type)
     {
+        Debug.Log($"[CursorController] Current event type: '{type}'");
+
+        if (target == null)
+        {
+            SetCursor("Default");
+            return;
+        }
+
+        if (!target.activeInHierarchy)
+        {
+            SetCursor("Default");
+            return;
+        }
+
         if (type == typeof(IPointerEnterHandler))
         {
             SetCursor("PointerEnter");
