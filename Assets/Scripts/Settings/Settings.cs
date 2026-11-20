@@ -80,7 +80,7 @@ namespace CreamyCrescentRolls.RoomGame.Settings
                 });
 
                 if (document["version"]?.Type != JTokenType.Integer || !(document["values"] is JObject values))
-                    throw new JsonSerializationException("Settings require an integer version and an object of values.");
+                    throw new JsonSerializationException("Settings require an integer version and an object of values");
 
                 var data = new SettingsData { version = document["version"].ToObject<int>() };
                 foreach (var property in values.Properties())
@@ -92,7 +92,7 @@ namespace CreamyCrescentRolls.RoomGame.Settings
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-            => throw new NotSupportedException("Use the default settings serializer for writing.");
+            => throw new NotSupportedException("Use the default settings serializer for writing");
     }
 
     public sealed class SettingsState
@@ -109,11 +109,11 @@ namespace CreamyCrescentRolls.RoomGame.Settings
             foreach (var definition in definitions)
             {
                 if (definition == null || string.IsNullOrWhiteSpace(definition.settingName))
-                    throw new ArgumentException("Every setting must have a non-empty name.");
+                    throw new ArgumentException("Every setting must have a non-empty name");
 
                 string name = definition.settingName;
                 if (name != name.Trim() || _definitions.ContainsKey(name))
-                    throw new ArgumentException($"Duplicate name or surrounding whitespace: '{name}'.");
+                    throw new ArgumentException($"Duplicate name or surrounding whitespace: {name}");
 
                 ValidateValue(definition, definition.DefaultValue);
                 _definitions.Add(name, definition);
@@ -125,7 +125,7 @@ namespace CreamyCrescentRolls.RoomGame.Settings
         public T Get<T>(string name, bool pending = false)
         {
             if (!TryGet(name, out T value, pending))
-                throw new ArgumentException($"Setting '{name}' does not exist or is not {typeof(T).Name}.");
+                throw new ArgumentException($"Setting {name} does not exist or is not {typeof(T).Name}");
 
             return value;
         }
@@ -145,7 +145,7 @@ namespace CreamyCrescentRolls.RoomGame.Settings
         {
             if (name == null || !_definitions.TryGetValue(name, out var definition)
                 || definition.ValueType != typeof(T))
-                throw new ArgumentException($"Setting '{name}' does not exist or is not {typeof(T).Name}.");
+                throw new ArgumentException($"Setting {name} does not exist or is not {typeof(T).Name}");
 
             ValidateValue(definition, value);
             _pending[name] = value;
@@ -163,7 +163,7 @@ namespace CreamyCrescentRolls.RoomGame.Settings
         public void Restore(SettingsData data)
         {
             if (data == null || data.version != 1 || data.values == null)
-                throw new ArgumentException("Unsupported or incomplete settings document.");
+                throw new ArgumentException("Unsupported or incomplete settings document");
 
             var candidate = new Dictionary<string, object>(StringComparer.Ordinal);
             foreach (var definition in _definitions.Values)
@@ -221,11 +221,11 @@ namespace CreamyCrescentRolls.RoomGame.Settings
         {
             Type type = definition.ValueType;
             if (type != typeof(float) && type != typeof(int) && type != typeof(bool) && type != typeof(string))
-                throw new ArgumentException($"Unsupported setting type: {type}.");
+                throw new ArgumentException($"Unsupported setting type: {type}");
 
             if (value == null || value.GetType() != type
                 || value is float number && (float.IsNaN(number) || float.IsInfinity(number)))
-                throw new ArgumentException($"Invalid value for setting '{definition.settingName}'.");
+                throw new ArgumentException($"Invalid value for setting {definition.settingName}");
         }
 
         private static object ReadValue(SettingDefinition definition, JToken token)
@@ -233,7 +233,7 @@ namespace CreamyCrescentRolls.RoomGame.Settings
             object value;
             Type type = definition.ValueType;
             if (token == null)
-                throw new ArgumentException($"Missing value for '{definition.settingName}'.");
+                throw new ArgumentException($"Missing value for {definition.settingName}");
 
             if (type == typeof(float) && (token.Type == JTokenType.Float || token.Type == JTokenType.Integer))
                 value = token.ToObject<float>();
@@ -244,7 +244,7 @@ namespace CreamyCrescentRolls.RoomGame.Settings
             else if (type == typeof(string) && token.Type == JTokenType.String)
                 value = token.ToObject<string>();
             else
-                throw new ArgumentException($"Wrong JSON type for '{definition.settingName}': {token.Type}.");
+                throw new ArgumentException($"Wrong JSON type for {definition.settingName}: {token.Type}");
 
             ValidateValue(definition, value);
             return value;
@@ -260,7 +260,7 @@ namespace CreamyCrescentRolls.RoomGame.Settings
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
             if (string.IsNullOrWhiteSpace(path))
-                throw new ArgumentException("Settings path must not be empty.", nameof(path));
+                throw new ArgumentException("Settings path must not be empty", nameof(path));
 
             string temporaryPath = path + ".tmp";
             try

@@ -12,7 +12,7 @@ namespace CreamyCrescentRolls.RoomGame.JsonSaver
             if (string.IsNullOrWhiteSpace(path))
             {
                 Debug.LogError("[JsonSaver] Path must not be empty");
-                throw new ArgumentException("Path must not be empty.", nameof(path));
+                throw new ArgumentException("Path must not be empty", nameof(path));
             }
 
             if (obj == null)
@@ -38,7 +38,7 @@ namespace CreamyCrescentRolls.RoomGame.JsonSaver
             if (string.IsNullOrWhiteSpace(path))
             {
                 Debug.LogError("[JsonSaver] Path must not be empty");
-                throw new ArgumentException("Path must not be empty.", nameof(path));
+                throw new ArgumentException("Path must not be empty", nameof(path));
             }
 
             string json = File.ReadAllText(path);
@@ -46,7 +46,7 @@ namespace CreamyCrescentRolls.RoomGame.JsonSaver
             if (string.IsNullOrWhiteSpace(json))
             {
                 Debug.LogError("[JsonSaver] JSON document is empty");
-                throw new JsonSerializationException("JSON document is empty.");
+                throw new JsonSerializationException("JSON document is empty");
             }
 
             T result = JsonConvert.DeserializeObject<T>(json);
@@ -54,7 +54,7 @@ namespace CreamyCrescentRolls.RoomGame.JsonSaver
             if (result == null)
             {
                 Debug.LogError("[JsonSaver] JSON document contains null");
-                throw new JsonSerializationException("JSON document contains null.");
+                throw new JsonSerializationException("JSON document contains null");
             }
 
             return result;

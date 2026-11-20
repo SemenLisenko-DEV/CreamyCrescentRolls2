@@ -60,7 +60,7 @@ namespace CreamyCrescentRolls.RoomGame.Conditions
         {
             if(_conditons.ContainsKey(id))
             {
-                Debug.LogWarning("[ConditionsHolder] ConditionsHolder already contains condition with id: " + id);
+                Debug.LogWarning($"[ConditionsHolder] ConditionsHolder already contains condition with id: {id}");
                 return;
             }
 
@@ -71,7 +71,7 @@ namespace CreamyCrescentRolls.RoomGame.Conditions
         {
             if (!_conditons.ContainsKey(id))
             {
-                Debug.LogWarning("[ConditionsHolder] ConditionsHolder dosent contains condition with id: " + id);
+                Debug.LogWarning($"[ConditionsHolder] ConditionsHolder dosent contains condition with id: {id}");
                 return;
             }
 

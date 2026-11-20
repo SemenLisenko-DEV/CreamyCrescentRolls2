@@ -180,7 +180,7 @@ public class GameSettings : MonoBehaviour
             }
             catch (Exception exception)
             {
-                Debug.LogError($"[GameSettings] Save failed; applied values retained. {exception.Message}", this);
+                Debug.LogError($"[GameSettings] Save failed; applied values retained. {exception.Message}");
                 return false;
             }
 
