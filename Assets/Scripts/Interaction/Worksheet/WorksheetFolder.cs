@@ -9,8 +9,7 @@ public class WorksheetFolder : MonoBehaviour, IInitializePotentialDragHandler, I
 {
     [SerializeField] private Worksheet _worksheet;
 
-    [SerializeField] private UnityEvent _onTryTakeWorksheet;
-    [SerializeField] private UnityEvent _onTakeWorksheet;
+    [SerializeField] private UnityEvent _onRightChoice;
 
     private List<WorksheetData> _worksheetDatas = new();
 
@@ -69,14 +68,19 @@ public class WorksheetFolder : MonoBehaviour, IInitializePotentialDragHandler, I
 
         if (_route.choisedWorksheetDatas.Count == 0)
         {
-            Debug.Log("[WorksheetFolder] Choised worksheets data count equals zero");
+            Debug.LogWarning("[WorksheetFolder] Choised worksheets data count equals zero");
             return;
         }
 
         if (_worksheet.gameObject.activeSelf)
         {
-            _onTryTakeWorksheet.Invoke();
-            Debug.Log("[WorksheetFolder] Worksheet object is active");
+            Debug.LogWarning("[WorksheetFolder] Worksheet object is active");
+            return;
+        }
+
+        if (_route.choisedWorksheetDatas.Count <= _route.worksheetIndex)
+        {
+            Debug.LogWarning("[WorksheetFolder] Day route already ended, because havent any worksheet for work");
             return;
         }
 
@@ -113,7 +117,6 @@ public class WorksheetFolder : MonoBehaviour, IInitializePotentialDragHandler, I
 
         ExecuteEvents.Execute(_worksheet.gameObject, eventData, ExecuteEvents.dragHandler);
 
-        _onTakeWorksheet.Invoke();
         _route.worksheetIndex++;
     }
 
@@ -137,20 +140,23 @@ public class WorksheetFolder : MonoBehaviour, IInitializePotentialDragHandler, I
             return;
         }
 
-        _worksheet.Finish();
+        if (!_worksheet.Finish())
+        {
+            _onRightChoice.Invoke();
+        }
     }
 
     public void RejectWorksheet(Collider collider)
     {
         if (collider == null)
         {
-            Debug.LogWarning("[WorksheetFolder] Submit collider equals null/fakeNull");
+            Debug.LogWarning("[WorksheetFolder] Reject collider equals null/fakeNull");
             return;
         }
 
         if (!collider.TryGetComponent(out Worksheet worksheet))
         {
-            Debug.LogWarning("[WorksheetFolder] Submit collider hasnt worksheet component");
+            Debug.LogWarning("[WorksheetFolder] Reject collider hasnt worksheet component");
             return;
         }
 
@@ -160,7 +166,10 @@ public class WorksheetFolder : MonoBehaviour, IInitializePotentialDragHandler, I
             return;
         }
 
-        _worksheet.Finish();
+        if (_worksheet.Finish())
+        {
+            _onRightChoice.Invoke();
+        }
     }
 
     private WorksheetData GetData()
