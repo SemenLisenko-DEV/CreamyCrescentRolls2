@@ -1,13 +1,18 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class DayRoute : MonoBehaviour
 {
     [SerializeField] private UnityEvent<DayRoute> _onDayStart;
-    [SerializeField] private UnityEvent _onDayEnd;
+    [SerializeField] private UnityEvent<DayStats> _onDayEnd;
+    [SerializeField] private UnityEvent _onTryEndDay;
+    [SerializeField] private UnityEvent _onFailedDay;
+    [SerializeField] private UnityEvent _onLastWorksheet;
+    [SerializeField] private TMP_Text _timerDisplay;
 
     [Serializable]
     public class DayActivity
@@ -16,6 +21,8 @@ public class DayRoute : MonoBehaviour
         public int deffectsCount = 1;
         public int worksheetCount = 5;
         public float dayTime = 60f * 10;
+        public UnityEvent onStartActivity;
+        public UnityEvent onEndActivity;
     }
 
     [SerializeField] private List<DayActivity> _activities = new();
@@ -25,6 +32,7 @@ public class DayRoute : MonoBehaviour
         public int correctCount = 0;
         public float dayTimer = 0;
         public bool routeActive = false;
+        public int answeredCount = 0;
     }
 
     public int currentActivitiy = -1;
@@ -62,6 +70,7 @@ public class DayRoute : MonoBehaviour
             yield break;
         }
 
+        GetCurrentActivity().onStartActivity.Invoke();
         currentDay.dayTimer = GetCurrentActivity().dayTime;
         _onDayStart.Invoke(this);
         currentDay.routeActive = true;
@@ -71,11 +80,14 @@ public class DayRoute : MonoBehaviour
         while(currentDay.dayTimer > 0)
         {
             currentDay.dayTimer -= Time.deltaTime;
+
+            if(_timerDisplay != null)
+                _timerDisplay.text = $"До конца дня: {(int)currentDay.dayTimer}";
+
             yield return null;
         }
 
-        currentDay.routeActive = false;
-        _onDayEnd.Invoke();
+        TryEndDay();
     }
 
     public DayActivity GetCurrentActivity()
@@ -93,10 +105,59 @@ public class DayRoute : MonoBehaviour
     {
         if(!currentDay.routeActive)
         {
-            Debug.LogError("[DayRoute] Day route is not started/alredy ended");
+            Debug.LogWarning("[DayRoute] Day route is not started/alredy ended");
             return;
         }
 
         currentDay.correctCount++;
+    }
+
+    public void MakeAnswer()
+    {
+        currentDay.answeredCount++;
+
+        if (currentDay.answeredCount >= GetCurrentActivity().worksheetCount)
+        {
+            _onLastWorksheet.Invoke();
+        }
+    }
+
+    public void TryEndDay()
+    {
+        if(currentDay.dayTimer <= 0 && currentDay.routeActive && currentDay.answeredCount < GetCurrentActivity().worksheetCount)
+        {
+            Debug.Log("[DayRoute] Current day failed");
+            _onFailedDay.Invoke();
+            return;
+        }
+
+        if (currentDay.answeredCount < GetCurrentActivity().worksheetCount)
+        {
+            Debug.Log("[DayRoute] Current day cant be ended, because not all worksheet is checked");
+            _onTryEndDay.Invoke();
+            return;
+        }
+
+        StopAllCoroutines();
+
+        GetCurrentActivity().onEndActivity.Invoke();
+
+        currentDay.routeActive = false;
+
+        if (_timerDisplay != null)
+            _timerDisplay.text = "";
+
+        _onDayEnd.Invoke(currentDay);
+    }
+
+    [SerializeField] private TMP_Text _finalsTitleField;
+    [SerializeField] private TMP_Text _correctCountField;
+    [SerializeField] private TMP_Text _wrongCountField;
+
+    public void FillDayFinals(DayStats dayStats)
+    {
+        _finalsTitleField.text = $"Финалы дня {currentActivitiy + 1}";
+        _correctCountField.text = $"Правильно проверенно: {dayStats.correctCount}";
+        _wrongCountField.text = $"Неверно проверенно: {GetCurrentActivity().worksheetCount - dayStats.correctCount}";
     }
 }
