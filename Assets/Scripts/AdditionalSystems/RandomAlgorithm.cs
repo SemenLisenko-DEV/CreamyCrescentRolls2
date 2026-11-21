@@ -13,7 +13,7 @@ namespace CreamyCrescentRolls.RoomGame.RandomAlgorithm
                 return;
             }
 
-            Debug.Log($"[ListRandomer] Spliting in list with lenght: '{targetList.Count}' n: '{n}'");
+            //Debug.Log($"[ListRandomer] Spliting in list with lenght: '{targetList.Count}' n: '{n}'");
 
             for (int i = 0; i < n; i++)
                 targetList[UnityEngine.Random.Range(0, targetList.Count)]++;
