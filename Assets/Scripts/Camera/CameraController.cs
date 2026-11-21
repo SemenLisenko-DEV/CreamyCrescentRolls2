@@ -62,6 +62,22 @@ public class CameraController : MonoBehaviour
         }
     }
 
+    public Vector3 MouseRayCastPoint
+    {
+        get
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+            if (Physics.Raycast(ray, out RaycastHit hit, 20f))
+            {
+                return hit.point;
+            }
+
+            Debug.LogError("[CameraController] Mouse raycast nothing hited");
+            return Vector3.zero;
+        }
+    }
+
     private void Awake()
     {
         Instance = this;
@@ -119,7 +135,9 @@ public class CameraController : MonoBehaviour
 
     public void ChangeToPosition(string positionName) => StartCoroutine(ChangeToPosition_C(positionName));
 
-    private IEnumerator ChangeToPosition_C(string positionName)
+    public void ChangeToPositionInstantly(string positionName) => StartCoroutine(ChangeToPosition_C(positionName, 0));
+
+    private IEnumerator ChangeToPosition_C(string positionName, float changeTime = -1)
     {
         if (_transition)
             yield break;
@@ -134,7 +152,7 @@ public class CameraController : MonoBehaviour
 
         if (cameraPosition.name == _currentCameraPosition)
         {
-            Debug.Log($"[CameraController] Camera position is already on {positionName}");
+            Debug.LogWarning($"[CameraController] Camera position is already on {positionName}");
             yield break;
         }
 
@@ -144,7 +162,7 @@ public class CameraController : MonoBehaviour
             yield break;
         }
 
-        float duration = _transitionTime;
+        float duration = changeTime >= 0 ? changeTime : _transitionTime;
         if (duration < 0f || float.IsNaN(duration) || float.IsInfinity(duration))
         {
             Debug.LogWarning("[CameraController] Transition time must be finite and non-negative");
