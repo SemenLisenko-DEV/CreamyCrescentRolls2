@@ -20,7 +20,7 @@ public class CursorController : MonoBehaviour
     }
     private void OnGlobalEvent(GameObject target, Type type)
     {
-        Debug.Log($"[CursorController] Current event type: '{type}'");
+        //Debug.Log($"[CursorController] Current event type: '{type}'");
 
         if (target == null)
         {
