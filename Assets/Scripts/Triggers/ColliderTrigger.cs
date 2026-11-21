@@ -7,6 +7,12 @@ public class ColliderTrigger : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        if (other == null)
+        {
+            Debug.LogWarning("[ColliderTrigger] Collider, that entered trigger, equals null/fakeNull");
+            return;
+        }    
+
         onTriggerEnter.Invoke(other);
     }
 }
