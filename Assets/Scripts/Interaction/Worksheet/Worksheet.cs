@@ -2,7 +2,6 @@ using CreamyCrescentRolls.RoomGame.RandomAlgorithm;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
-using UnityEditor.Build;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -13,13 +12,15 @@ public class Worksheet : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     private List<GameObject> _constructs = new();
     [SerializeField] private Transform _layout;
 
-    [SerializeField] private float _speed;
+    //[SerializeField] private float _speed;
 
     [SerializeField] private List<char> _randomDefectsChars = new();
 
     private List<List<GameObject>> _resourcesConstructs = new();
     [SerializeField] private int _constructsTypesCount = 0;
     private bool _haveDeffects = false;
+
+    //public GameObject help;
 
     public bool Inizialize(WorksheetData data, int defectCount)
     {
@@ -120,7 +121,7 @@ public class Worksheet : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         return _haveDeffects;
     }
 
-    private void Move(Vector3 offest)
+    private void Move(Vector3 newPosition)
     {
         if (_moveArea == null)
         {
@@ -131,8 +132,6 @@ public class Worksheet : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         Vector3 areaPosition = _moveArea.transform.position;
 
         Vector3 halfSize = _moveArea.size * 0.5f;
-
-        Vector3 newPosition = transform.position + offest;
 
         newPosition.x = Mathf.Clamp(newPosition.x, areaPosition.x - halfSize.x, areaPosition.x + halfSize.x);
         newPosition.y = Mathf.Clamp(newPosition.y, areaPosition.y - halfSize.y, areaPosition.y + halfSize.y);
@@ -156,10 +155,12 @@ public class Worksheet : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         if (eventData.button != PointerEventData.InputButton.Left)
             return;
 
-        Vector3 point = CameraController.Instance.RayCastPoint;
-        Vector3 offest = _speed * Time.deltaTime * new Vector3(eventData.delta.x, 0, eventData.delta.y);
+        Vector3 point = CameraController.Instance.MouseRayCastPoint;
+        //Vector3 offest = _speed * Time.deltaTime * new Vector3(eventData.delta.x, 0, eventData.delta.y);
 
-        Move(offest);
+        Move(point);
+
+        //help.transform.position = point;
     }
 
 }
