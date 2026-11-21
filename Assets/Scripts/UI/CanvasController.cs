@@ -105,4 +105,14 @@ public class CanvasController : MonoBehaviour
 
         return noneActiveCanvas;
     }
+
+    public void BlockChange()
+    {
+        changeBlockConditions.AddListener(() => true, "ALWAYSBLOCK");
+    }
+
+    public void UnBlockChange()
+    {
+        changeBlockConditions.DeleteListener("ALWAYSBLOCK");
+    }
 }
