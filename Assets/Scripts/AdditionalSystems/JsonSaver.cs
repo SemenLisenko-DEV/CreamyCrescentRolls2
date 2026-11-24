@@ -7,18 +7,18 @@ namespace CreamyCrescentRolls.RoomGame.JsonSaver
 {
     public static class JsonSaver
     {
-        public static void Save<T>(T obj, string path) where T : class
+        public static bool Save<T>(T obj, string path) where T : class
         {
             if (string.IsNullOrWhiteSpace(path))
             {
                 Debug.LogError("[JsonSaver] Path must not be empty");
-                throw new ArgumentException("Path must not be empty", nameof(path));
+                return false;
             }
 
             if (obj == null)
             {
                 Debug.LogError("[JsonSaver] Object must not be null");
-                throw new ArgumentNullException(nameof(obj));
+                return false;
             }
 
             string json = JsonConvert.SerializeObject(obj, Formatting.Indented);
@@ -31,14 +31,23 @@ namespace CreamyCrescentRolls.RoomGame.JsonSaver
             }
 
             File.WriteAllText(path, json);
+            return true;
         }
 
-        public static T Load<T>(string path)
+        public static bool Load<T>(string path, out T result) where T : class
         {
+            result = null;
+
             if (string.IsNullOrWhiteSpace(path))
             {
                 Debug.LogError("[JsonSaver] Path must not be empty");
-                throw new ArgumentException("Path must not be empty", nameof(path));
+                return false;
+            }
+
+            if (!File.Exists(path))
+            {
+                Debug.LogWarning("[JsonSaver] File arent exists");
+                return false;
             }
 
             string json = File.ReadAllText(path);
@@ -46,18 +55,18 @@ namespace CreamyCrescentRolls.RoomGame.JsonSaver
             if (string.IsNullOrWhiteSpace(json))
             {
                 Debug.LogError("[JsonSaver] JSON document is empty");
-                throw new JsonSerializationException("JSON document is empty");
+                return false;
             }
 
-            T result = JsonConvert.DeserializeObject<T>(json);
+            result = JsonConvert.DeserializeObject<T>(json);
 
             if (result == null)
             {
                 Debug.LogError("[JsonSaver] JSON document contains null");
-                throw new JsonSerializationException("JSON document contains null");
+                return false;
             }
 
-            return result;
+            return true;
         }
     }
 }

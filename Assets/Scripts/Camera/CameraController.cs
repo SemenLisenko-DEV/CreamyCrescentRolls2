@@ -1,3 +1,4 @@
+using CreamyCrescentRolls.RoomGame.Settings;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -89,7 +90,7 @@ public class CameraController : MonoBehaviour
         ChangeToPosition("Main");
 
         GetSettings();
-        GameSettings.SettingsApplied += GetSettings;
+        GameSettings.Instance.SettingsApplied += GetSettings;
     }
 
     private void Update()
@@ -118,14 +119,15 @@ public class CameraController : MonoBehaviour
 
     private void OnDestroy()
     {
-        GameSettings.SettingsApplied -= GetSettings;
+        GameSettings.Instance.SettingsApplied -= GetSettings;
     }
 
     public void GetSettings()
     {
         try
         {
-            _sensative = GameSettings.GetSetting<float>("Sensative");
+            Setting setting = GameSettings.Instance.GetSetting("Sensative");
+            _sensative = setting.floatValue;
         }
         catch(Exception e)
         {

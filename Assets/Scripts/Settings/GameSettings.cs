@@ -1,236 +1,150 @@
+using CreamyCrescentRolls.RoomGame.JsonSaver;
+using CreamyCrescentRolls.RoomGame.Settings;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using CreamyCrescentRolls.RoomGame.Conditions;
-using CreamyCrescentRolls.RoomGame.Settings;
 using UnityEngine;
 using UnityEngine.Events;
 
-[DefaultExecutionOrder(-1000)]
+[DefaultExecutionOrder(-100)]
 public class GameSettings : MonoBehaviour
 {
-    [SerializeField] private List<FloatSetting> _floatSettings = new();
-    [SerializeField] private List<IntSetting> _intSettings = new();
-    [SerializeField] private List<BoolSetting> _boolSettings = new();
-    [SerializeField] private List<StringSetting> _stringSettings = new();
-    [SerializeField] private string _fileName = "settings.json";
-    [SerializeField] private bool _persistBetweenScenes = true;
-    [SerializeField] private UnityEvent _onUnsavedChangesChecked = new();
-
     public static GameSettings Instance { get; private set; }
-    public static event Action SettingsApplied;
 
-    private SettingsState _state;
-    private string _savePath;
-    private bool _busy;
-    private bool _checkingUnsavedChanges;
-    private string _canvasBlockConditionId;
-    private readonly HashSet<ConditionsHolder> _canvasBlockConditions = new();
+    public Action SettingsApplied;
 
-    private void Awake()
+    [SerializeField] private List<SettingBinder> _binds = new();
+    private List<Setting> _settings = new();
+    [SerializeField] private string _saveName;
+
+    [SerializeField] private UnityEvent _onHaveChanges;
+    [SerializeField] private UnityEvent _closeSettings;
+
+    private bool _haveChanges = false;
+    
+    private string _savePath
     {
-        if (Instance != null && Instance != this)
+        get
         {
-            Debug.LogWarning("[GameSettings] A settings instance already exists; duplicate disabled.", this);
-            enabled = false;
-            return;
+            return Path.Combine(Application.persistentDataPath, _saveName);
         }
+    }
 
-        try
-        {
-            if (string.IsNullOrWhiteSpace(_fileName) || _fileName != Path.GetFileName(_fileName)
-                || _fileName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0
-                || _fileName == "." || _fileName == "..")
-                throw new ArgumentException("Settings file name must be a plain file name.");
-
-            _state = new SettingsState(GetDefinitions());
-            _savePath = Path.Combine(Application.persistentDataPath, _fileName);
-        }
-        catch (Exception exception)
-        {
-            Debug.LogError($"[GameSettings] Invalid configuration: {exception.Message}", this);
-            _state = null;
-            enabled = false;
-            return;
-        }
-
-        if (File.Exists(_savePath))
-        {
-            try
-            {
-                _state.Restore(SettingsStorage.Load(_savePath));
-            }
-            catch (Exception exception)
-            {
-                Debug.LogWarning($"[GameSettings] Could not load settings; defaults retained. {exception.Message}", this);
-            }
-        }
-
+    public void Awake()
+    {
         Instance = this;
-        if (_persistBetweenScenes && transform.parent == null)
-            DontDestroyOnLoad(gameObject);
-        else if (_persistBetweenScenes)
-            Debug.LogWarning("[GameSettings] Place this component on a root object to persist between scenes.", this);
+
+        Load();
+
+        LoadBinds();
     }
 
-    private void OnDestroy()
+    public void ChangeSetting(string name, float value)
     {
-        foreach (var conditions in _canvasBlockConditions)
-            conditions.DeleteListener(_canvasBlockConditionId);
-
-        _canvasBlockConditions.Clear();
-
-        if (Instance == this)
-            Instance = null;
+        Setting setting = GetSetting(name);
+        OnSomethingChanged();
+        setting.floatValue = value;
     }
 
-    public bool HasUnsavedChanges() => _state != null && _state.HasPendingChanges();
-
-    public void CheckUnsavedChanges(CanvasController canvasController)
+    public void ChangeSetting(string name, int value)
     {
-        if (_checkingUnsavedChanges)
+        Setting setting = GetSetting(name);
+        OnSomethingChanged();
+        setting.intValue = value;
+    }
+
+    public void ChangeSetting(string name, string value)
+    {
+        Setting setting = GetSetting(name);
+        OnSomethingChanged();
+        setting.stringValue = value;
+    }
+
+    public void ChangeSetting(string name, bool value)
+    {
+        Setting setting = GetSetting(name);
+        OnSomethingChanged();
+        setting.boolValue = value;
+    }
+
+    public Setting GetSetting(string name)
+    {
+        Setting setting = _settings.Find((x) => x.name == name);
+
+        if (setting == null)
+        {
+            Debug.Log($"[GameSettings] Setting with name '{name}' arent loaded/exists");
+
+            setting = new();
+            setting.name = name;
+            setting.isNew = true;
+
+            _settings.Add(setting);
+        }
+        else
+        {
+            setting.isNew = false;  
+        }
+        return setting;
+    }
+
+    public void OnSomethingChanged()
+    {
+        _haveChanges = true;
+    }
+
+    public void TryCloseSettings()
+    {
+        if (_haveChanges)
+        {
+            _onHaveChanges.Invoke();
             return;
-
-        _checkingUnsavedChanges = true;
-        try
-        {
-            if (Instance != this || _state == null)
-            {
-                Debug.LogWarning("[GameSettings] Cannot check changes before initialization.", this);
-                return;
-            }
-
-            if (canvasController == null || canvasController.changeBlockConditions == null)
-            {
-                Debug.LogWarning("[GameSettings] CanvasController and its block conditions must be assigned.", this);
-                return;
-            }
-
-            var conditions = canvasController.changeBlockConditions;
-            if (conditions.checkType != ConditonCheckType.Any)
-            {
-                Debug.LogWarning("[GameSettings] Canvas block conditions must use Any.", this);
-                return;
-            }
-
-            if (_canvasBlockConditions.Add(conditions))
-            {
-                _canvasBlockConditionId ??= $"GameSettings.UnsavedChanges.{GetInstanceID()}";
-                conditions.AddListener(HasUnsavedChanges, _canvasBlockConditionId);
-            }
         }
-        finally
-        {
-            try { _onUnsavedChangesChecked?.Invoke(); }
-            catch (Exception exception) { Debug.LogException(exception, this); }
-            finally { _checkingUnsavedChanges = false; }
-        }
+
+        _closeSettings.Invoke();
     }
 
-    public static T GetSetting<T>(string name)
+    public void ApplyChanges()
     {
-        if (Instance == null || Instance._state == null)
-            throw new InvalidOperationException("GameSettings has not been initialized.");
-
-        return Instance._state.Get<T>(name);
+        Save();
+        SettingsApplied?.Invoke();
+        _haveChanges = false;
     }
 
-    public static bool TryGetSetting<T>(string name, out T value)
+    public void DeclineChanges()
     {
-        value = default;
-        return Instance != null && Instance._state != null && Instance._state.TryGet(name, out value);
+        Load();
+        SettingsApplied?.Invoke();
+        _haveChanges = false;
     }
 
-    public static bool TryGetPendingSetting<T>(string name, out T value)
+    public void LoadBinds()
     {
-        value = default;
-        return Instance != null && Instance._state != null && Instance._state.TryGet(name, out value, true);
-    }
-
-    public static bool SetSetting<T>(string name, T value)
-    {
-        if (Instance == null || !Instance.CanEdit())
-            return false;
-
-        try
+        foreach (var bind in _binds)
         {
-            Instance._state.SetPending(name, value);
-            return true;
+            bind.Load();
         }
-        catch (ArgumentException exception)
-        {
-            Debug.LogWarning($"[GameSettings] {exception.Message}", Instance);
-            return false;
-        }
+
+        _haveChanges = false;
     }
 
-    public void ApplySettings() => TryApplySettings();
-
-    public bool TryApplySettings()
+    public void Load()
     {
-        if (!CanEdit())
-            return false;
-
-        _busy = true;
-        try
+        if (!JsonSaver.Load(_savePath, out _settings))
         {
-            try
-            {
-                SettingsStorage.Save(_state.CapturePending(), _savePath);
-            }
-            catch (Exception exception)
-            {
-                Debug.LogError($"[GameSettings] Save failed; applied values retained. {exception.Message}");
-                return false;
-            }
-
-            if (_state.CommitPending())
-                NotifySettingsApplied();
-
-            return true;
-        }
-        finally
-        {
-            _busy = false;
-        }
-    }
-
-    public void CancelChanges()
-    {
-        if (!CanEdit())
+            _settings = new();
+            Debug.LogWarning("[GameSettings] Failed to load settings");
             return;
-
-        _state.CancelChanges();
-    }
-
-    public void ResetToDefaults()
-    {
-        if (!CanEdit())
-            return;
-
-        _state.ResetToDefaults();
-    }
-
-    private bool CanEdit() => Instance == this && _state != null && !_busy;
-
-    private IEnumerable<SettingDefinition> GetDefinitions()
-    {
-        foreach (var setting in _floatSettings) yield return setting;
-        foreach (var setting in _intSettings) yield return setting;
-        foreach (var setting in _boolSettings) yield return setting;
-        foreach (var setting in _stringSettings) yield return setting;
-    }
-
-    private void NotifySettingsApplied()
-    {
-        var listeners = SettingsApplied;
-        if (listeners == null)
-            return;
-
-        foreach (Action listener in listeners.GetInvocationList())
-        {
-            try { listener(); }
-            catch (Exception exception) { Debug.LogException(exception, this); }
         }
     }
+
+    public void Save()
+    {
+        if (!JsonSaver.Save(_settings, _savePath))
+        {
+            Debug.LogWarning("[GameSettings] Failed to save settings");
+            return;
+        }
+    }
+
 }
