@@ -5,18 +5,18 @@ namespace CreamyCrescentRolls.RoomGame.RandomAlgorithm
 {
     public class ListRandomer
     {
-        public static void SplitInList(List<int> targetList, int n)
+        public static List<int> SplitInList(int m, int n)
         {
-            if (targetList == null)
-            {
-                Debug.LogError($"[ListRandomer] Target list equals null");
-                return;
-            }
+            List<int> resultList = new();
 
+            for (int i = 0; i < m; i++)
+                resultList.Add(0);
             //Debug.Log($"[ListRandomer] Spliting in list with lenght: '{targetList.Count}' n: '{n}'");
 
             for (int i = 0; i < n; i++)
-                targetList[UnityEngine.Random.Range(0, targetList.Count)]++;
+                resultList[UnityEngine.Random.Range(0, m)]++;
+
+            return resultList;
         }
     }
 }

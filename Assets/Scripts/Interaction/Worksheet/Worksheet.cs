@@ -1,7 +1,7 @@
 using CreamyCrescentRolls.RoomGame.RandomAlgorithm;
+using CreamyCrescentRolls.RoomGameWorksheetVars;
 using System.Collections.Generic;
 using System.Linq;
-using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -14,22 +14,14 @@ public class Worksheet : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
 
     //[SerializeField] private float _speed;
 
-    [SerializeField] private List<char> _randomDefectsChars = new();
-
     private List<List<GameObject>> _resourcesConstructs = new();
     [SerializeField] private int _constructsTypesCount = 0;
     private bool _haveDeffects = false;
 
     //public GameObject help;
 
-    public bool Inizialize(WorksheetData data, int defectCount)
+    public void LoadConstucts()
     {
-        if (data == null)
-        {
-            Debug.LogWarning("[Worksheet] Worksheet trying to inizialize with worksheet data, that equals null");
-            return false;
-        }
-
         if (_resourcesConstructs == null || _resourcesConstructs?.Count == 0)
         {
             _resourcesConstructs = new();
@@ -43,65 +35,46 @@ public class Worksheet : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
 
             Debug.Log($"[Worksheet] Worksheet loaded {_resourcesConstructs.Count} constructs types of constructs: \n" + log);
         }
+    }
 
-        _haveDeffects = defectCount > 0;
-
-        List<int> defects = new();
-        for (int i = 0; i < _resourcesConstructs.Count; i++)
-            defects.Add(0);
-
-        ListRandomer.SplitInList(defects, defectCount);
+    public bool Inizialize(int defectCount, List<bool> allowedConstructs)
+    {
+        if (allowedConstructs == null)
+        {
+            Debug.LogWarning("[Worksheet] Worksheet trying to inizialize with allowed constructs list, that equals null");
+            return false;
+        }
 
         gameObject.SetActive(true);
 
-        for(int i = 0; i < _resourcesConstructs.Count; i++)
+        for(int i = 0; i < _resourcesConstructs.Count && i < allowedConstructs.Count; i++)
         {
+            if (!allowedConstructs[i])
+                continue;
+
             int j = UnityEngine.Random.Range(0, _resourcesConstructs[i].Count);
             _constructs.Add(Instantiate(_resourcesConstructs[i][j], _layout));
         }
 
-        for(int i = 0; i < _constructs.Count; i++)
-        {
+        _haveDeffects = defectCount > 0;
+
+        List<int> defects = ListRandomer.SplitInList(_constructs.Count, defectCount);
+
+        for (int i = 0; i < _constructs.Count; i++)
             GenerateDefects(_constructs[i], defects[i]);
-        }
 
         return true;
     }
 
     private void GenerateDefects(GameObject target, int count)
     {
-        if(target.TryGetComponent(out TMP_Text tmp_text))
+        if(!target.TryGetComponent(out IWorksheetConstruct worksheetConstruct))
         {
-            tmp_text.text = MakeDefectInText(tmp_text.text, count);
-        }
-    }
-
-    private string MakeDefectInText(string text, int count)
-    {
-        if(text.Length == 0 || count == 0)
-            return text;
-
-        char[] chars = text.ToCharArray();
-        int[] shakedIndexes = new int[chars.Length];
-
-        for(int i = 0; i < shakedIndexes.Length ;i++)
-        {
-            shakedIndexes[i] = i;
+            Debug.Log("[Worksheet] Target object dosent contains IWorksheetConstruct to make defects in it");
+            return;
         }
 
-        for (int i = 0; i < shakedIndexes.Length; i++)
-        {
-            int j = UnityEngine.Random.Range(i, shakedIndexes.Length);
-            (shakedIndexes[i], shakedIndexes[j]) = (shakedIndexes[j], shakedIndexes[i]);
-        }
-
-        for (int i = 0; i < count && i < chars.Length; i++)
-        {
-            int j = UnityEngine.Random.Range(0, _randomDefectsChars.Count);
-            chars[shakedIndexes[i]] = _randomDefectsChars[j];
-        }
-
-        return new(chars);
+        worksheetConstruct.MakeDefect(count);
     }
 
     public bool Finish()

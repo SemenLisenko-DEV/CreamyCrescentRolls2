@@ -1,4 +1,5 @@
-using System;
+using CreamyCrescentRolls.RoomGame.RandomAlgorithm;
+using CreamyCrescentRolls.RoomGameWorksheetVars;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -7,23 +8,12 @@ using UnityEngine.Events;
 
 public class DayRoute : MonoBehaviour
 {
-    [SerializeField] private UnityEvent<DayRoute> _onDayStart;
+    [SerializeField] private UnityEvent<DayActivity> _onDayStart;
     [SerializeField] private UnityEvent<DayStats> _onDayEnd;
     [SerializeField] private UnityEvent _onTryEndDay;
     [SerializeField] private UnityEvent _onFailedDay;
     [SerializeField] private UnityEvent _onLastWorksheet;
     [SerializeField] private TMP_Text _timerDisplay;
-
-    [Serializable]
-    public class DayActivity
-    {
-        public float startDelay = 1f;
-        public int deffectsCount = 1;
-        public int worksheetCount = 5;
-        public float dayTime = 60f * 10;
-        public UnityEvent onStartActivity;
-        public UnityEvent onEndActivity;
-    }
 
     [SerializeField] private List<DayActivity> _activities = new();
 
@@ -72,9 +62,11 @@ public class DayRoute : MonoBehaviour
 
         GetCurrentActivity().onStartActivity.Invoke();
         currentDay.dayTimer = GetCurrentActivity().dayTime;
-        _onDayStart.Invoke(this);
-        currentDay.routeActive = true;
 
+        GetCurrentActivity().defects = ListRandomer.SplitInList(GetCurrentActivity().worksheetCount, GetCurrentActivity().deffectsCount);
+        _onDayStart.Invoke(GetCurrentActivity());
+
+        currentDay.routeActive = true;
         yield return new WaitForSeconds(GetCurrentActivity().startDelay);
 
         while(currentDay.dayTimer > 0)
