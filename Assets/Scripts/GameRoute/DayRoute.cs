@@ -1,5 +1,5 @@
 using CreamyCrescentRolls.RoomGame.RandomAlgorithm;
-using CreamyCrescentRolls.RoomGameWorksheetVars;
+using CreamyCrescentRolls.RoomGame.WorksheetVars;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;

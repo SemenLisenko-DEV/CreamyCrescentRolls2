@@ -1,4 +1,4 @@
-using CreamyCrescentRolls.RoomGameWorksheetVars;
+using CreamyCrescentRolls.RoomGame.WorksheetVars;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -13,7 +13,7 @@ public class WorksheetSignature : MonoBehaviour, IWorksheetConstruct
     private Image image;
     private TMP_Text text;
 
-    public void MakeDefect(int count)
+    public void MakeDefect(int count, List<GameObject> othersConstructs)
     {
         if (count == 0)
             return;

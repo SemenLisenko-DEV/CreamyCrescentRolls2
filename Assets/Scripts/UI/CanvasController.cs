@@ -3,6 +3,7 @@ using CreamyCrescentRolls.RoomGame.GameTime;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class CanvasController : MonoBehaviour
 {
@@ -22,6 +23,9 @@ public class CanvasController : MonoBehaviour
     public List<GameObject> canvases;
 
     public string defaultCanvas = string.Empty;
+
+    [SerializeField] private UnityEvent _onActivateCanvas;
+    [SerializeField] private UnityEvent _onDisableCanvases;
 
     public string ActiveCanvas
     {
@@ -76,11 +80,14 @@ public class CanvasController : MonoBehaviour
     private void SetCanvas(GameObject canvas)
     {
         TimeManager.AddTimeStopper(gameObject);
+        _onActivateCanvas.Invoke();
         canvas.SetActive(true);
     }
 
     public void DisableAllCanvases()
     {
+        _onDisableCanvases.Invoke();
+
         if (changeBlockConditions.GetState())
         {
             Debug.Log("[CanvasController] Canvas change is blocked");
@@ -114,5 +121,10 @@ public class CanvasController : MonoBehaviour
     public void UnBlockChange()
     {
         changeBlockConditions.DeleteListener("ALWAYSBLOCK");
+    }
+
+    private void OnDestroy()
+    {
+        TimeManager.RemoveTimeStopper(gameObject);
     }
 }

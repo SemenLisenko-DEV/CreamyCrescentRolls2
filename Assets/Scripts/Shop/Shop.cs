@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class Shop : MonoBehaviour
 {
@@ -29,11 +30,52 @@ public class Shop : MonoBehaviour
     {
         public string name = "";
         public int cost = 0;
-        public bool isPurchased = false;
+        public Sprite sprite = null;
         public UnityEvent onBuy;
+        [HideInInspector] public bool isPurchased = false;
     }
 
     public List<Goods> listOfGoods = new();
+    [SerializeField] private GameObject _goodsPrefab;
+    [SerializeField] private Transform _shopLayout;
+
+    [SerializeField] private GameObject _itemPrefab;
+    [SerializeField] private Transform _itemsLayout;
+
+    public void Awake()
+    {
+        foreach (var goods in listOfGoods)
+        {
+            GameObject goodsObj = Instantiate(_goodsPrefab, _shopLayout);
+
+            TMP_Text text = goodsObj.GetComponentInChildren<TMP_Text>(true);
+            if (text != null)
+            {
+                text.text = goods.name + '\n' + goods.cost + '$';
+            }
+
+            if (goods.sprite != null && goodsObj.TryGetComponent(out Image image))
+            {
+                image.sprite = goods.sprite;
+            }
+
+            if (goodsObj.TryGetComponent(out Button button))
+            {
+                button.onClick.AddListener(() => Buy(goods.name));
+            }
+
+            goods.onBuy.AddListener(() =>
+            {
+                if (goodsObj.TryGetComponent(out Button button))
+                {
+                    button.interactable = false;
+                }
+            }
+            );
+
+            goods.onBuy.AddListener(() => AddGoodsItem(goods));
+        }
+    }
 
     public void Buy(string goodsName)
     {
@@ -68,5 +110,24 @@ public class Shop : MonoBehaviour
     {
         Money += dayStats.correctCount * _moneyPerCorrectAnswer;
         _moneyAmountField.text = $"Денег заработано: {dayStats.correctCount * _moneyPerCorrectAnswer}";
+    }
+
+    public void AddGoodsItem(Goods goods)
+    {
+        GameObject itemObj = Instantiate(_itemPrefab, _itemsLayout);
+
+        if (itemObj.TryGetComponent(out Image image) && goods.sprite != null)
+        {
+            image.sprite = goods.sprite;
+        }
+        else
+        {
+            TMP_Text text = itemObj.GetComponentInChildren<TMP_Text>();
+
+            if (text != null)
+            {
+                text.text = goods.name;
+            }
+        }
     }
 }

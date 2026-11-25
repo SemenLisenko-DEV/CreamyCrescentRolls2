@@ -1,24 +1,19 @@
 using CreamyCrescentRolls.RoomGame.RandomAlgorithm;
-using CreamyCrescentRolls.RoomGameWorksheetVars;
+using CreamyCrescentRolls.RoomGame.WorksheetVars;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
-public class Worksheet : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IDragHandler
+public class Worksheet : MonoBehaviour
 { 
-    [SerializeField] private BoxCollider _moveArea;
-
     private List<GameObject> _constructs = new();
     [SerializeField] private Transform _layout;
-
-    //[SerializeField] private float _speed;
 
     private List<List<GameObject>> _resourcesConstructs = new();
     [SerializeField] private int _constructsTypesCount = 0;
     private bool _haveDeffects = false;
 
-    //public GameObject help;
+    public bool inProcess = false;
 
     public void LoadConstucts()
     {
@@ -45,6 +40,7 @@ public class Worksheet : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
             return false;
         }
 
+        inProcess = true;
         gameObject.SetActive(true);
 
         for(int i = 0; i < _resourcesConstructs.Count && i < allowedConstructs.Count; i++)
@@ -74,7 +70,7 @@ public class Worksheet : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
             return;
         }
 
-        worksheetConstruct.MakeDefect(count);
+        worksheetConstruct.MakeDefect(count, _constructs);
     }
 
     public bool Finish()
@@ -89,52 +85,10 @@ public class Worksheet : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
             Destroy(constuct);
         }
 
+        inProcess = false;
         _constructs.Clear();
 
         return _haveDeffects;
     }
-
-    private void Move(Vector3 newPosition)
-    {
-        if (_moveArea == null)
-        {
-            Debug.LogWarning("[Worksheet] Worksheet move area not defined");
-            return;
-        }
-
-        Vector3 areaPosition = _moveArea.transform.position;
-
-        Vector3 halfSize = _moveArea.size * 0.5f;
-
-        newPosition.x = Mathf.Clamp(newPosition.x, areaPosition.x - halfSize.x, areaPosition.x + halfSize.x);
-        newPosition.y = Mathf.Clamp(newPosition.y, areaPosition.y - halfSize.y, areaPosition.y + halfSize.y);
-        newPosition.z = Mathf.Clamp(newPosition.z, areaPosition.z - halfSize.z, areaPosition.z + halfSize.z);
-
-        transform.position = newPosition;
-    }
-
-    public void OnPointerEnter(PointerEventData eventData)
-    {
-
-    }
-
-    public void OnPointerExit(PointerEventData eventData)
-    {
-
-    }
-
-    public void OnDrag(PointerEventData eventData)
-    {
-        if (eventData.button != PointerEventData.InputButton.Left)
-            return;
-
-        Vector3 point = CameraController.Instance.MouseRayCastPoint;
-        //Vector3 offest = _speed * Time.deltaTime * new Vector3(eventData.delta.x, 0, eventData.delta.y);
-
-        Move(point);
-
-        //help.transform.position = point;
-    }
-
 }
 

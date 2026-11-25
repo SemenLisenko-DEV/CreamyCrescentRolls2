@@ -18,5 +18,14 @@ namespace CreamyCrescentRolls.RoomGame.RandomAlgorithm
 
             return resultList;
         }
+
+        public static void Shuffle(List<int> target)
+        {
+            for (int i = target.Count - 1; i > 0; i--)
+            {
+                int j = UnityEngine.Random.Range(0, i + 1);
+                (target[i], target[j]) = (target[j], target[i]);
+            }
+        }
     }
 }

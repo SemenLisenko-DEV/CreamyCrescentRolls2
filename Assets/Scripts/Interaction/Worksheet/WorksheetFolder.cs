@@ -1,7 +1,4 @@
-using CreamyCrescentRolls.RoomGame.RandomAlgorithm;
-using CreamyCrescentRolls.RoomGameWorksheetVars;
-using System.Collections.Generic;
-using System.Linq;
+using CreamyCrescentRolls.RoomGame.WorksheetVars;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -35,13 +32,19 @@ public class WorksheetFolder : MonoBehaviour, IInitializePotentialDragHandler, I
 
         if (_worksheet == null)
         {
-            Debug.LogWarning("[WorksheetFolder] Worksheet object not defined");
+            Debug.LogError("[WorksheetFolder] Worksheet object not defined");
             return;
         }
 
         if(_dayActivity.currentWorksheet >= _dayActivity.defects.Count)
         {
-            Debug.LogError("[WorksheetFolder] Distributed defects are out of count");
+            Debug.LogWarning("[WorksheetFolder] Distributed defects are out of count");
+            return;
+        }
+
+        if (_worksheet.inProcess)
+        {
+            Debug.Log("[WorksheetFolder] Worksheet object in process");
             return;
         }
 

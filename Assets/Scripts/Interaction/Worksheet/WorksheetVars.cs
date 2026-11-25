@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace CreamyCrescentRolls.RoomGameWorksheetVars
+namespace CreamyCrescentRolls.RoomGame.WorksheetVars
 {
     public interface IWorksheetConstruct
     {
-        public void MakeDefect(int count);
+        public void MakeDefect(int count, List<GameObject> othersConstructs);
     }
 
     [Serializable]

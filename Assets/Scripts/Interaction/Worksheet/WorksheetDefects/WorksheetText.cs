@@ -1,14 +1,15 @@
-using CreamyCrescentRolls.RoomGameWorksheetVars;
+using CreamyCrescentRolls.RoomGame.WorksheetVars;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
 public class WorksheetText : MonoBehaviour, IWorksheetConstruct 
 {
-    private static readonly char[] _randomDefectsChars = {'|', '#', '@', '+', ')', '('};
+    private static readonly char[] _randomDefectsChars = {'|', '#', '>', '+', ')', '('};
 
     private TMP_Text _textField;
 
-    public void MakeDefect(int count)
+    public void MakeDefect(int count, List<GameObject> othersConstructs)
     {
         if (_textField == null)
             _textField = GetComponentInChildren<TMP_Text>();
