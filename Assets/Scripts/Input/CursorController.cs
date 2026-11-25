@@ -34,7 +34,7 @@ public class CursorController : MonoBehaviour
             return;
         }
 
-        if (type == typeof(IPointerEnterHandler))
+        if (type == typeof(IPointerEnterHandler) || type == typeof(IPointerDownHandler) || type == typeof(IPointerUpHandler))
         {
             SetCursor("PointerEnter");
         }

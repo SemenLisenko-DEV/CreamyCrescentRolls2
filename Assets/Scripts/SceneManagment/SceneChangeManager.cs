@@ -6,8 +6,14 @@ using UnityEngine.SceneManagement;
 public class SceneChangeManager : MonoBehaviour
 {
     public UnityEvent onStartLoad;
+    public UnityEvent onEndLoad;
 
     [SerializeField] private float _loadTime;
+
+    private void Awake()
+    {
+        onEndLoad.Invoke();
+    }
 
     public void LoadScene(string sceneName) => StartCoroutine(LoadScene_C(sceneName));
 
@@ -18,5 +24,10 @@ public class SceneChangeManager : MonoBehaviour
         yield return new WaitForSecondsRealtime(_loadTime);
 
         SceneManager.LoadSceneAsync(sceneName);
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
     }
 }
