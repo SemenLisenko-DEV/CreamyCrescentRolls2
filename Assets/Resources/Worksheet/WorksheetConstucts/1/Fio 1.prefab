@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 8121644116239720953}
   - component: {fileID: 142844322781089748}
   - component: {fileID: 4820069408116974042}
+  - component: {fileID: -1138432251729758598}
   m_Layer: 6
   m_Name: Fio 1
   m_TagString: Untagged
@@ -135,3 +136,15 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &-1138432251729758598
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6204109163248449556}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af213b7613277be4e9c601dc7af035df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
