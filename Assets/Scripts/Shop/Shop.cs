@@ -29,7 +29,7 @@ public class Shop : MonoBehaviour
     public class Goods
     {
         public string name = "";
-        public int cost = 0;
+        [Min(0)] public int cost = 0;
         public Sprite sprite = null;
         public UnityEvent onBuy;
         [HideInInspector] public bool isPurchased = false;
@@ -90,6 +90,12 @@ public class Shop : MonoBehaviour
         if (goods.isPurchased)
         {
             Debug.LogWarning($"[Shop] Goods with name: {goodsName} already purchased");
+            return;
+        }
+
+        if (goods.cost < 0)
+        {
+            Debug.LogWarning($"[Shop] Goods with name: {goodsName} have negative cost");
             return;
         }
 
