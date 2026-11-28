@@ -44,10 +44,9 @@ public class DayRoute : MonoBehaviour
             return;
         }
 
-        if (_activities[currentActivitiy + 1].dayTime < 0 || _activities[currentActivitiy + 1].worksheetCount <= 0)
+        if (_activities[currentActivitiy + 1].Protect())
         {
             Debug.LogError("[DayRoute] Day activity has broken fields");
-            return;
         }
 
         StartDayRoute();

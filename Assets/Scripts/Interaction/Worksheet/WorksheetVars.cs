@@ -23,6 +23,37 @@ namespace CreamyCrescentRolls.RoomGame.WorksheetVars
 
         [HideInInspector] public List<int> defects = new();
         [HideInInspector] public int currentWorksheet = new();
+
+        public bool Protect()
+        {
+            bool haveDefects = false;
+
+            if (startDelay < 0)
+            {
+                haveDefects = true;
+                startDelay = 0;
+            }
+
+            if (deffectsCount < 0)
+            {
+                haveDefects = true;
+                deffectsCount = 0;
+            }
+
+            if (worksheetCount <= 0)
+            {
+                haveDefects = true;
+                worksheetCount = 1;
+            }
+
+            if (dayTime < 0)
+            {
+                haveDefects = true;
+                dayTime = 0;
+            }
+
+            return haveDefects;
+        }
     }
 
 }
