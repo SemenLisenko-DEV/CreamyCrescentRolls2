@@ -17,7 +17,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_text
       value: "\u041D\u043E\u043C\u0435\u0440 \u0434\u043E\u043A\u0443\u043C\u0435\u043D\u0442\u0430:
-        2789\r\n"
+        2789\r"
       objectReference: {fileID: 0}
     - target: {fileID: 8745234939994747345, guid: 6cc156ebf5461c2468a56a338bcab272,
         type: 3}
