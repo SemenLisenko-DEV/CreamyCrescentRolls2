@@ -22,11 +22,6 @@ public class SettingBinder : MonoBehaviour
 
     [SerializeField] private DefaultValues _defaultValues;
 
-    private void Awake()
-    {
-        GameSettings.Instance.SettingsApplied += Load;
-    }
-
     private void OnDestroy()
     {
         GameSettings.Instance.SettingsApplied -= Load;
@@ -34,6 +29,7 @@ public class SettingBinder : MonoBehaviour
 
     public void Load()
     {
+        GameSettings.Instance.SettingsApplied += Load;
         Setting setting = GameSettings.Instance.GetSetting(_name);
 
         if(setting.isNew)

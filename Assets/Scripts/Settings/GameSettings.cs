@@ -39,6 +39,11 @@ public class GameSettings : MonoBehaviour
         LoadBinds();
     }
 
+    private void Start()
+    {
+        ApplyChanges();
+    }
+
     public void ChangeSetting(string name, float value)
     {
         Setting setting = GetSetting(name);
