@@ -10820,7 +10820,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   textField: {fileID: 1975003725}
   _charTime: 0.05
-  _stayTime: 0.1
+  _stayTime: 1
   _soundSource: {fileID: 949181909}
 --- !u!1 &967833240
 GameObject:
