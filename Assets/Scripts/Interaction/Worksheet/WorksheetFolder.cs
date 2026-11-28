@@ -8,12 +8,13 @@ public class WorksheetFolder : MonoBehaviour, IInitializePotentialDragHandler, I
     [SerializeField] private Worksheet _worksheet;
 
     [SerializeField] private UnityEvent _onRightChoice;
+    [SerializeField] private UnityEvent _onWrongChoice;
 
     private DayActivity _dayActivity;
 
     public void Inizialize(DayActivity dayActivity)
     {
-        if(dayActivity == null)
+        if (dayActivity == null)
         {
             Debug.LogError("[WorksheetFolder] Day activity is null");
             return;
@@ -30,6 +31,12 @@ public class WorksheetFolder : MonoBehaviour, IInitializePotentialDragHandler, I
             return;
         }
 
+        if (_dayActivity == null)
+        {
+            Debug.LogError("[WorksheetFolder] Day activity is null");
+            return;
+        }
+
         if (_worksheet == null)
         {
             Debug.LogError("[WorksheetFolder] Worksheet object not defined");
@@ -39,12 +46,6 @@ public class WorksheetFolder : MonoBehaviour, IInitializePotentialDragHandler, I
         if(_dayActivity.currentWorksheet >= _dayActivity.defects.Count)
         {
             Debug.LogWarning("[WorksheetFolder] Distributed defects are out of count");
-            return;
-        }
-
-        if (_worksheet.inProcess)
-        {
-            Debug.Log("[WorksheetFolder] Worksheet object in process");
             return;
         }
 
@@ -90,9 +91,9 @@ public class WorksheetFolder : MonoBehaviour, IInitializePotentialDragHandler, I
         }
 
         if (!_worksheet.Finish())
-        {
             _onRightChoice.Invoke();
-        }
+        else
+            _onWrongChoice.Invoke();
     }
 
     public void RejectWorksheet(Collider collider)
@@ -116,9 +117,9 @@ public class WorksheetFolder : MonoBehaviour, IInitializePotentialDragHandler, I
         }
 
         if (_worksheet.Finish())
-        {
             _onRightChoice.Invoke();
-        }
+        else
+            _onWrongChoice.Invoke();
     }
 
     public void OnDrag(PointerEventData eventData)

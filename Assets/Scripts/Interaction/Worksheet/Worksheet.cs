@@ -40,6 +40,12 @@ public class Worksheet : MonoBehaviour
             return false;
         }
 
+        if (inProcess)
+        {
+            Debug.LogWarning("[Worksheet] Worksheet already in process!");
+            return false;
+        }
+
         inProcess = true;
         gameObject.SetActive(true);
 

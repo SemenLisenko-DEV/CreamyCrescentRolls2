@@ -13,6 +13,7 @@ public class DayRoute : MonoBehaviour
     [SerializeField] private UnityEvent _onTryEndDay;
     [SerializeField] private UnityEvent _onFailedDay;
     [SerializeField] private UnityEvent _onLastWorksheet;
+    [SerializeField] private UnityEvent<DayStats> _onLastActivity;
     [SerializeField] private TMP_Text _timerDisplay;
 
     [SerializeField] private List<DayActivity> _activities = new();
@@ -31,7 +32,7 @@ public class DayRoute : MonoBehaviour
 
     public void TryStartNewRoute()
     {
-        if (currentActivitiy + 1 == _activities.Count)
+        if (currentActivitiy + 1 >= _activities.Count)
         {
             Debug.Log("[DayRoute] Routes ended");
             return;
@@ -40,6 +41,12 @@ public class DayRoute : MonoBehaviour
         if (currentDay.routeActive)
         {
             Debug.Log("[DayRoute] Route already started");
+            return;
+        }
+
+        if (_activities[currentActivitiy + 1].dayTime < 0 || _activities[currentActivitiy + 1].worksheetCount <= 0)
+        {
+            Debug.LogError("[DayRoute] Day activity has broken fields");
             return;
         }
 
@@ -93,19 +100,16 @@ public class DayRoute : MonoBehaviour
         return _activities[currentActivitiy];
     }
 
-    public void AddToCorrect()
+    public void MakeAnswer(bool isRight)
     {
-        if(!currentDay.routeActive)
+        if (!currentDay.routeActive)
         {
             Debug.LogWarning("[DayRoute] Day route is not started/alredy ended");
             return;
         }
 
-        currentDay.correctCount++;
-    }
+        currentDay.correctCount += isRight ? 1 : 0;
 
-    public void MakeAnswer()
-    {
         currentDay.answeredCount++;
 
         if (currentDay.answeredCount >= GetCurrentActivity().worksheetCount)
@@ -116,6 +120,13 @@ public class DayRoute : MonoBehaviour
 
     public void TryEndDay()
     {
+        if (GetCurrentActivity() == null)
+        {
+            Debug.LogError("[DayRoute] Current day cant be ended, because havent inizialize current activity");
+            _onTryEndDay.Invoke();
+            return;
+        }
+
         if(currentDay.dayTimer <= 0 && currentDay.routeActive && currentDay.answeredCount < GetCurrentActivity().worksheetCount)
         {
             Debug.Log("[DayRoute] Current day failed");
@@ -139,7 +150,14 @@ public class DayRoute : MonoBehaviour
         if (_timerDisplay != null)
             _timerDisplay.text = "";
 
-        _onDayEnd.Invoke(currentDay);
+        if (currentActivitiy + 1 >= _activities.Count)
+        {
+            _onLastActivity.Invoke(currentDay);
+        }
+        else
+        {
+            _onDayEnd.Invoke(currentDay);
+        }
     }
 
     [SerializeField] private TMP_Text _finalsTitleField;

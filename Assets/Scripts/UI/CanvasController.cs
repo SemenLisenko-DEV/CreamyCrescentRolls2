@@ -1,6 +1,7 @@
 using CreamyCrescentRolls.RoomGame.Conditions;
 using CreamyCrescentRolls.RoomGame.GameTime;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -43,7 +44,12 @@ public class CanvasController : MonoBehaviour
 
     public void SetActiveCanvas(string name)
     {
-        if (changeBlockConditions.GetState())
+        SetActiveCanvas(name, false);
+    }
+
+    public void SetActiveCanvas(string name, bool ignoreBlock)
+    {
+        if (changeBlockConditions.GetState() && !ignoreBlock)
         {
             Debug.Log("[CanvasController] Canvas change is blocked");
             return;
@@ -51,6 +57,9 @@ public class CanvasController : MonoBehaviour
 
         if (ActiveCanvas == name)
         {
+            if (ActiveCanvas == defaultCanvas)
+                return;
+
             DisableAllCanvases();
             return;
         }
@@ -61,20 +70,19 @@ public class CanvasController : MonoBehaviour
         if (rederectPair != noneActiveCanvas)
         {
             SetActiveCanvas(rederectPair);
-            return;  
+            return;
         }
 
         foreach (var c in canvases)
         {
-            if(c.name == name)
+            if (c.name == name)
             {
                 SetCanvas(c);
                 return;
-            }    
+            }
         }
 
         Debug.LogError($"[CanvasController] Canvas with name: {name} not found");
-        throw new System.Exception();
     }
 
     private void SetCanvas(GameObject canvas)
@@ -99,6 +107,8 @@ public class CanvasController : MonoBehaviour
             canvas.SetActive(false);
         }
 
+        GameObject defaultCanvasObj = canvases.Find((x) => x.name == defaultCanvas);
+
         TimeManager.RemoveTimeStopper(gameObject);
     }
 
@@ -121,6 +131,21 @@ public class CanvasController : MonoBehaviour
     public void UnBlockChange()
     {
         changeBlockConditions.DeleteListener("ALWAYSBLOCK");
+    }
+
+    public void SetWithDelay(string canvas_delay)
+    {
+        string canvas = canvas_delay.Split('_')[0];
+        float delay = float.Parse(canvas_delay.Split('_')[1]);
+
+        StartCoroutine(SetWithDelay_C(canvas, delay));
+    }
+
+    private IEnumerator SetWithDelay_C(string canvas, float delay)
+    {
+        yield return new WaitForSecondsRealtime(delay);
+
+        SetActiveCanvas(canvas, true);
     }
 
     private void OnDestroy()
